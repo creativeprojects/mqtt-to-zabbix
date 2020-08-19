@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"github.com/blacked/go-zabbix"
+	"github.com/coreos/go-systemd/daemon"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -23,8 +24,8 @@ var (
 
 func main() {
 	var err error
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, os.Kill, syscall.SIGABRT, syscall.SIGTERM)
 
 	flag.StringVar(&configFile, "config", "config.yaml", "configuration file")
 	flag.BoolVar(&verbose, "v", false, "display debugging information")
@@ -52,16 +53,15 @@ func main() {
 		ErrorLog.Printf("zabbix server url not valid '%s': %s", config.Zabbix.Server, err)
 		return
 	}
-	DebugLog.Printf("%+v", zabbixURL)
 	zabbixHost := zabbixURL.Hostname()
 	zabbixPort, err := strconv.Atoi(zabbixURL.Port())
 	if err != nil || zabbixPort == 0 {
 		zabbixPort = 10051
 	}
 	zabbixSender = zabbix.NewSender(zabbixHost, zabbixPort)
-	DebugLog.Printf("Zabbix server: %s port %d", zabbixHost, zabbixPort)
+	DebugLog.Printf("zabbix server: %s port %d", zabbixHost, zabbixPort)
 
-	connOpts := MQTT.NewClientOptions().AddBroker(config.MQTT.ServerURL).SetClientID(config.MQTT.ClientID).SetCleanSession(true)
+	connOpts := MQTT.NewClientOptions().AddBroker(config.MQTT.ServerURL).SetClientID(config.MQTT.ClientID)
 	tlsConfig := &tls.Config{InsecureSkipVerify: true, ClientAuth: tls.NoClientCert}
 	connOpts.SetTLSConfig(tlsConfig)
 
@@ -79,9 +79,21 @@ func main() {
 		return
 	}
 
-	DebugLog.Printf("connected to MQTT server %s", config.MQTT.ServerURL)
+	DebugLog.Printf("connected to MQTT server: %s, client ID: %s", config.MQTT.ServerURL, config.MQTT.ClientID)
 
-	<-c
+	// Notify systemd we're ready to serve
+	notifyReady()
+
+	// systemd watchdog
+	go setupWatchdog(client)
+
+	// Wait until we're politely asked to leave
+	<-stop
+
+	client.Disconnect(2000)
+
+	// Notify systemd we're leaving
+	daemon.SdNotify(false, daemon.SdNotifyStopping)
 }
 
 func onMessageReceived(client MQTT.Client, message MQTT.Message) {

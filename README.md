@@ -28,3 +28,5 @@ conversions:
     key: mqtt.pizero.bmp280.pressure
 
 ```
+
+If launched as a systemd service, it sends a watchdog message to systemd every 5 minutes

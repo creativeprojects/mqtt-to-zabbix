@@ -1,0 +1,12 @@
+[Unit]
+Description=MQTT to Zabbix
+
+[Service]
+Type=notify
+WorkingDirectory=/opt/mqtt-to-zabbix/
+ExecStart=/opt/mqtt-to-zabbix/mqtt-to-zabbix
+WatchdogSec=900s
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

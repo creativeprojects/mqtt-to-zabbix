@@ -41,8 +41,6 @@ type ConversionConfiguration struct {
 // newConfiguration creates an empty configuration object with a default configuration
 func newConfiguration() *Configuration {
 	config := &Configuration{}
-	hostname, _ := os.Hostname()
-	config.MQTT.ClientID = hostname + strconv.Itoa(time.Now().Second())
 	config.MQTT.QOS = 1
 	return config
 }
@@ -65,5 +63,13 @@ func loadConfiguration(reader io.ReadCloser) (*Configuration, error) {
 	if err != nil {
 		return nil, err
 	}
+	validateConfiguration(config)
 	return config, nil
+}
+
+func validateConfiguration(config *Configuration) {
+	if config.MQTT.ClientID == "" {
+		config.MQTT.ClientID, _ = os.Hostname()
+	}
+	config.MQTT.ClientID = config.MQTT.ClientID + strconv.Itoa(time.Now().Nanosecond())
 }
