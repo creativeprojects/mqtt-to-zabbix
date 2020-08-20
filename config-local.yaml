@@ -1,0 +1,23 @@
+---
+mqtt:
+    client-id: mqtt-to-zabbix
+    server: tcp://127.0.0.1:1883
+    topics:
+      - "homie/#"
+
+zabbix:
+    server: 127.0.0.1
+
+conversions:
+  -
+    topic: homie/envirophat/rpi/temperature
+    hostname: envirophat
+    key: mqtt.envirophat.rpi.temperature
+  -
+    topic: homie/envirophat/bmp280/temperature
+    hostname: envirophat
+    key: mqtt.envirophat.bmp280.temperature
+  -
+    topic: homie/envirophat/bmp280/pressure
+    hostname: envirophat
+    key: mqtt.envirophat.bmp280.pressure
