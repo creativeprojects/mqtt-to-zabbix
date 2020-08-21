@@ -2,65 +2,75 @@ package main
 
 import (
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"sync"
 
+	"github.com/creativeprojects/clog"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
 const (
-	prefixCriticalMQTT = "MQTT CRITICAL"
-	prefixErrorMQTT    = "MQTT ERROR   "
-	prefixWarningMQTT  = "MQTT WARNING "
-	prefixDebugMQTT    = "MQTT DEBUG   "
-	prefixErrorApp     = "ERROR        "
-	prefixDebugApp     = "DEBUG        "
+	prefixMQTT = "MQTT "
+	prefixApp  = "APP  "
 )
 
 var (
 	// DebugLog is the default debug logger
-	DebugLog *log.Logger
+	DebugLog *clog.StandardLogger
 	// ErrorLog is the default error logger
-	ErrorLog *log.Logger
+	ErrorLog *clog.StandardLogger
 )
 
 func setupLogger(verbose, veryVerbose bool) {
-	stderr := newLogHandler(os.Stderr)
-	stdout := newLogHandler(os.Stdout)
-	MQTT.CRITICAL = log.New(stderr, prefixCriticalMQTT, log.LstdFlags|log.Lmsgprefix)
-	MQTT.ERROR = log.New(stderr, prefixErrorMQTT, log.LstdFlags|log.Lmsgprefix)
-	if verbose {
-		MQTT.WARN = log.New(stdout, prefixWarningMQTT, log.LstdFlags|log.Lmsgprefix)
+	stderr := newLogWriter(os.Stderr)
+	stdout := newLogWriter(os.Stdout)
+	MQTT.CRITICAL = clog.NewStandardLogger(
+		clog.LevelError,
+		clog.NewStandardLogHandler(stderr, prefixMQTT, log.LstdFlags|log.Lmsgprefix),
+	)
+	MQTT.ERROR = MQTT.CRITICAL
+	if verbose || veryVerbose {
+		MQTT.WARN = clog.NewStandardLogger(
+			clog.LevelWarning,
+			clog.NewStandardLogHandler(stdout, prefixMQTT, log.LstdFlags|log.Lmsgprefix),
+		)
 	}
 	if veryVerbose {
-		MQTT.DEBUG = log.New(stdout, prefixDebugMQTT, log.LstdFlags|log.Lmsgprefix)
+		MQTT.DEBUG = clog.NewStandardLogger(
+			clog.LevelDebug,
+			clog.NewStandardLogHandler(stdout, prefixMQTT, log.LstdFlags|log.Lmsgprefix),
+		)
 	}
 
-	ErrorLog = log.New(stderr, prefixErrorApp, log.LstdFlags|log.Lmsgprefix)
+	ErrorLog = clog.NewStandardLogger(
+		clog.LevelError,
+		clog.NewStandardLogHandler(stderr, prefixApp, log.LstdFlags|log.Lmsgprefix),
+	)
 	if verbose {
-		DebugLog = log.New(stdout, prefixDebugApp, log.LstdFlags|log.Lmsgprefix)
+		DebugLog = clog.NewStandardLogger(
+			clog.LevelDebug,
+			clog.NewStandardLogHandler(stdout, prefixApp, log.LstdFlags|log.Lmsgprefix),
+		)
 	} else {
-		// TODO: this is a waste of resources + a mutex lock/unlock on each debug entry
-		DebugLog = log.New(ioutil.Discard, "", 0)
+		DebugLog = clog.NewStandardLogger(clog.LevelDebug, &clog.DiscardHandler{})
 	}
 }
 
-// logHandler is used to safe write to the logger
-type logHandler struct {
+// logWriter is used to safe write to the logger
+type logWriter struct {
 	mutex  sync.Mutex
 	writer io.Writer
 }
 
-func newLogHandler(writer io.Writer) *logHandler {
-	return &logHandler{
+func newLogWriter(writer io.Writer) *logWriter {
+	return &logWriter{
 		writer: writer,
 	}
 }
 
 // Safe write to the underlying writer
-func (h *logHandler) Write(p []byte) (int, error) {
+func (h *logWriter) Write(p []byte) (int, error) {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
@@ -69,5 +79,5 @@ func (h *logHandler) Write(p []byte) (int, error) {
 
 // Check interfaces
 var (
-	_ io.Writer = &logHandler{}
+	_ io.Writer = &logWriter{}
 )
