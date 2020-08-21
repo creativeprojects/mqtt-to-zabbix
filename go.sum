@@ -6,6 +6,12 @@ github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf h1:iW4rZ826su+pq
 github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
 github.com/creativeprojects/clog v0.3.0 h1:OXinlg1xF7lsgKC3GMXubhS7bH6ywWkPXzA/dGcd/CA=
 github.com/creativeprojects/clog v0.3.0/go.mod h1:ePe00iA7srKh7dcFksHHIGEeRjLmiXvk1afuDXw+CN4=
+github.com/creativeprojects/clog v0.4.0 h1:VaN2pYilhN68qjF75nZ/ON2Q90/dusE8fC2w7hrou/o=
+github.com/creativeprojects/clog v0.4.0/go.mod h1:ePe00iA7srKh7dcFksHHIGEeRjLmiXvk1afuDXw+CN4=
+github.com/creativeprojects/clog v0.4.1 h1:3a72f4x5MLBGFXKZyDLKW3FFWB0vY4HTeuWl6oGgunE=
+github.com/creativeprojects/clog v0.4.1/go.mod h1:ePe00iA7srKh7dcFksHHIGEeRjLmiXvk1afuDXw+CN4=
+github.com/creativeprojects/clog v0.4.2 h1:FZHIAWWtUMJZQlCUC4cYIZUU1INy88AxuKNw++OMLdM=
+github.com/creativeprojects/clog v0.4.2/go.mod h1:ePe00iA7srKh7dcFksHHIGEeRjLmiXvk1afuDXw+CN4=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/eclipse/paho.mqtt.golang v1.2.0 h1:1F8mhG9+aO5/xpdtFkW4SxOJB67ukuDC3t2y2qayIX0=

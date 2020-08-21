@@ -1,10 +1,7 @@
 package main
 
 import (
-	"io"
 	"log"
-	"os"
-	"sync"
 
 	"github.com/creativeprojects/clog"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
@@ -23,8 +20,8 @@ var (
 )
 
 func setupLogger(verbose, veryVerbose bool) {
-	stderr := newLogWriter(os.Stderr)
-	stdout := newLogWriter(os.Stdout)
+	stderr := clog.Stderr()
+	stdout := clog.Stdout()
 	MQTT.CRITICAL = clog.NewStandardLogger(
 		clog.LevelError,
 		clog.NewStandardLogHandler(stderr, prefixMQTT, log.LstdFlags|log.Lmsgprefix),
@@ -56,28 +53,3 @@ func setupLogger(verbose, veryVerbose bool) {
 		DebugLog = clog.NewStandardLogger(clog.LevelDebug, &clog.DiscardHandler{})
 	}
 }
-
-// logWriter is used to safe write to the logger
-type logWriter struct {
-	mutex  sync.Mutex
-	writer io.Writer
-}
-
-func newLogWriter(writer io.Writer) *logWriter {
-	return &logWriter{
-		writer: writer,
-	}
-}
-
-// Safe write to the underlying writer
-func (h *logWriter) Write(p []byte) (int, error) {
-	h.mutex.Lock()
-	defer h.mutex.Unlock()
-
-	return h.writer.Write(p)
-}
-
-// Check interfaces
-var (
-	_ io.Writer = &logWriter{}
-)

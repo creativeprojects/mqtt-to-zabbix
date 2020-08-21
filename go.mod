@@ -6,7 +6,7 @@ require (
 	github.com/bep/debounce v1.2.0
 	github.com/blacked/go-zabbix v0.0.0-20170118040903-3c6a95ec4fdc
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
-	github.com/creativeprojects/clog v0.3.0
+	github.com/creativeprojects/clog v0.4.2
 	github.com/eclipse/paho.mqtt.golang v1.2.0
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
