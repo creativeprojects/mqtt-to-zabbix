@@ -14,6 +14,10 @@ func notifyReady() {
 	}
 }
 
+func notifyLeaving() {
+	_, _ = daemon.SdNotify(false, daemon.SdNotifyStopping)
+}
+
 func setupWatchdog(client MQTT.Client) {
 	interval, err := daemon.SdWatchdogEnabled(false)
 	if err != nil {

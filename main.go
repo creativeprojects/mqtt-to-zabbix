@@ -11,7 +11,6 @@ import (
 	"syscall"
 
 	"github.com/blacked/go-zabbix"
-	"github.com/coreos/go-systemd/daemon"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -25,7 +24,7 @@ var (
 func main() {
 	var err error
 	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt, os.Kill, syscall.SIGABRT, syscall.SIGTERM)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGABRT, syscall.SIGTERM)
 
 	flag.StringVar(&configFile, "config", "config.yaml", "configuration file")
 	flag.BoolVar(&verbose, "v", false, "display debugging information")
@@ -66,6 +65,7 @@ func main() {
 	connOpts.SetTLSConfig(tlsConfig)
 
 	connOpts.OnConnect = func(c MQTT.Client) {
+		DebugLog.Printf("subscribing to %d topics", len(config.MQTT.Topics))
 		for _, topic := range config.MQTT.Topics {
 			if token := c.Subscribe(topic, byte(config.MQTT.QOS), onMessageReceived); token.Wait() && token.Error() != nil {
 				ErrorLog.Printf("error subscribing to topic '%s': %v", topic, token.Error())
@@ -93,7 +93,7 @@ func main() {
 	client.Disconnect(2000)
 
 	// Notify systemd we're leaving
-	daemon.SdNotify(false, daemon.SdNotifyStopping)
+	notifyLeaving()
 }
 
 func onMessageReceived(client MQTT.Client, message MQTT.Message) {
