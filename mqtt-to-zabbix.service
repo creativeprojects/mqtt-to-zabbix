@@ -1,5 +1,7 @@
 [Unit]
 Description=MQTT to Zabbix
+After=network.target
+After=openhab2.service
 
 [Service]
 Type=notify

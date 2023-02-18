@@ -1,3 +1,4 @@
 /config.yaml
 /mqtt-to-zabbix
 /build
+/.vscode/*.log
