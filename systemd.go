@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/coreos/go-systemd/daemon"
+	"github.com/coreos/go-systemd/v22/daemon"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
