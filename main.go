@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"net/url"
 	"os"
@@ -61,8 +62,18 @@ func main() {
 	DebugLog.Printf("zabbix server: %s port %d", zabbixHost, zabbixPort)
 
 	connOpts := MQTT.NewClientOptions().AddBroker(config.MQTT.ServerURL).SetClientID(config.MQTT.ClientID)
-	tlsConfig := &tls.Config{InsecureSkipVerify: true, ClientAuth: tls.NoClientCert}
-	connOpts.SetTLSConfig(tlsConfig)
+	if config.MQTT.Username != "" {
+		connOpts.SetUsername(config.MQTT.Username)
+	}
+	if config.MQTT.Password != "" {
+		connOpts.SetPassword(config.MQTT.Password)
+	}
+	if config.MQTT.CA != "" {
+		tlsConfig := getTLSConfig(config)
+		if tlsConfig != nil {
+			connOpts.SetTLSConfig(tlsConfig)
+		}
+	}
 
 	connOpts.OnConnect = func(c MQTT.Client) {
 		DebugLog.Printf("subscribing to %d topics", len(config.MQTT.Topics))
@@ -99,4 +110,26 @@ func main() {
 func onMessageReceived(client MQTT.Client, message MQTT.Message) {
 	DebugLog.Printf("received: '%s' = '%s'", message.Topic(), message.Payload())
 	transferMessage(message.Topic(), message.Payload())
+}
+
+func getTLSConfig(config *Configuration) *tls.Config {
+	if config.MQTT.CA == "" {
+		return nil
+	}
+	caCertPool, err := x509.SystemCertPool()
+	if err != nil {
+		caCertPool = x509.NewCertPool()
+	}
+	caCert, err := os.ReadFile(config.MQTT.CA)
+	if err != nil {
+		ErrorLog.Printf("cannot load CA certificate: %s", err)
+		return nil
+	}
+	if !caCertPool.AppendCertsFromPEM(caCert) {
+		ErrorLog.Printf("invalid certificate: %q", config.MQTT.CA)
+		return nil
+	}
+	return &tls.Config{
+		RootCAs: caCertPool,
+	}
 }

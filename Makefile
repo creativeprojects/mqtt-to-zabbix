@@ -7,8 +7,9 @@ GOTOOL=$(GOCMD) tool
 GOGET=$(GOCMD) get
 
 BINARY=mqtt-to-zabbix
+CONFIG=config.yaml
 DEPLOY_SERVER=nas18
-DEPLOY_BINARY=/opt/mqtt-to-zabbix/mqtt-to-zabbix
+DEPLOY_PATH=/opt/mqtt-to-zabbix/
 BUILD_PROD=./build
 TESTS=./...
 COVERAGE_FILE=coverage.out
@@ -35,4 +36,4 @@ build-prod:
 		GOOS="linux" GOARCH="amd64" $(GOBUILD) -o ${BUILD_PROD}/$(BINARY) -v
 
 deploy: build-prod
-		rsync -avz ${BUILD_PROD}/$(BINARY) $(DEPLOY_SERVER):$(DEPLOY_BINARY)
+		rsync -avz ${BUILD_PROD}/$(BINARY) $(CONFIG) $(DEPLOY_SERVER):$(DEPLOY_PATH)

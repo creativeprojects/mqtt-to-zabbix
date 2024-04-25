@@ -24,6 +24,7 @@ type MQTTConfiguration struct {
 	QOS       int      `yaml:"qos"`
 	Username  string   `yaml:"username"`
 	Password  string   `yaml:"password"`
+	CA        string   `yaml:"ca"`
 }
 
 // ZabbixConfiguration contains zabbix server configuration
