@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/bep/debounce"
-	"github.com/blacked/go-zabbix"
+	"github.com/datadope-io/go-zabbix/v2"
 )
 
 var (
@@ -51,12 +51,12 @@ func transferMessage(topic string, message []byte) {
 }
 
 func zabbixMetric(hostname, key, value string) {
-	zabbixMessageQueue.add(zabbix.NewMetric(hostname, key, value, time.Now().Unix()))
+	zabbixMessageQueue.add(zabbix.NewMetric(hostname, key, value, false, time.Now().Unix()))
 	debounced(zabbixSend)
 }
 
 func zabbixSend() {
-	packet := zabbix.NewPacket(zabbixMessageQueue.get())
+	packet := zabbix.NewPacket(zabbixMessageQueue.get(), false)
 
 	resp, err := zabbixSender.Send(packet)
 	if err != nil {

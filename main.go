@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"flag"
+	"fmt"
 	"net/url"
 	"os"
 	"os/signal"
@@ -11,7 +12,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/blacked/go-zabbix"
+	"github.com/datadope-io/go-zabbix/v2"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -58,8 +59,9 @@ func main() {
 	if err != nil || zabbixPort == 0 {
 		zabbixPort = 10051
 	}
-	zabbixSender = zabbix.NewSender(zabbixHost, zabbixPort)
-	DebugLog.Printf("zabbix server: %s port %d", zabbixHost, zabbixPort)
+	zabbixServer := fmt.Sprintf("%s:%d", zabbixHost, zabbixPort)
+	zabbixSender = zabbix.NewSender(zabbixServer)
+	DebugLog.Printf("zabbix server: %s", zabbixServer)
 
 	connOpts := MQTT.NewClientOptions().AddBroker(config.MQTT.ServerURL).SetClientID(config.MQTT.ClientID)
 	if config.MQTT.Username != "" {
